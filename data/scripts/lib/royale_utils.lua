@@ -1,44 +1,37 @@
+-- credits: https://github.com/gurgaczj
+-- contact: https://otland.net/members/zuber966.239759/
+
 -- BR CONFIG
+local royaleMapXSize = {121, 267} -- min, max X map size
+local royaleMapYSize = {108, 289} -- min, max Y map size
+local royaleMapOrigin = {197, 202} -- map origin point
+local royaleMapRadius = 100 -- map radius
+local royaleZoneChestsCount = 30 -- number of chests in one zone -> explained later
+local itemsInChest = 4 -- number of items in chest
+local BR_MAX_HP = 300 -- hp value at the start
+local BR_MAX_MP = 30 -- mp value at the start
 
---for tests
-local royaleMapXSize = {171, 203}
-local royaleMapYSize = {186, 217}
+local TOP_LEVEL_STRUCTURE = 6 -- top Z level walkable val
+local LOWEST_LEVEL_STRUCTURE = 8 -- lowest Z level walkable val
 
--- local royaleMapXSize = {121, 267}
--- local royaleMapYSize = {108, 289}
-local royaleMapOrigin = {197, 202}
-local royaleMapRadius = 98
-royaleMinusRadiusOnFire = 0
-local royaleQuadrandChestsCount = 30
-local maxItemsInChest = 3
-local BRMaxHP = 300
-local BRMaxMana = 30
+local COMMON_ITEMS = {8704, 2643, 2649, 2461, 9814, 2401, 2380, 2384, 2666, 2674} -- common items ids
+local LESS_COMMON_ITEMS = {38615, 38614, 2398, 7457, 2412, 10301, 7618, 2789} -- less common ids
+local RARE_ITEMS = {38613, 2417, 3963, 2378} -- rare ids
 
-local TOP_LEVEL_STRUCTURE = 6
-local LOWEST_LEVEL_STRUCTURE = 8
+-- Explanation. Fire spawn in circles. First small fire field and some time after small is replaced by big one
+local TIME_TO_SPAWN_BIG_FIRE = 4500 -- amount of time (ms) to spawn big fire after small
+local TIME_TO_SPAWN_SMALL_FIRE = 1900 -- amount of time to spawn small fire after big one
 
-local COMMON_ITEMS = {8704, 2643, 2649, 2461, 9814, 2401, 2380, 2384}
-local LESS_COMMON_ITEMS = {26387, 26386, 2398, 7457, 2412, 10301, 7618}
-local RARE_ITEMS = {26383, 2417, 3963, 2378}
-
-local TIME_TO_SPAWN_BIG_FIRE = 5742
-local TIME_TO_SPAWN_SMALL_FIRE = 2461
-
--- for tests
+-- map divieded into square zones for better chest spawn distribution
+-- min X, max X, min Y, max Y
 local ROYALE_MAP_ZONES = {
-	{171, 203, 186, 217}
+	{121, 192, 202, 289},
+	{193, 267, 198, 285},
+	{190, 264, 108, 197},
+	{122, 189, 115, 201}
 }
 
-thanks = "Thank you for participating in Battle Royale"
-
-
--- local ROYALE_MAP_ZONES = {
-	-- {121, 192, 202, 289},
-	-- {193, 267, 198, 285},
-	-- {190, 264, 108, 197},
-	-- {122, 189, 115, 201}
--- }
-
+-- chests that spawn always
 local CONSTANT_CHEST_SPAWN = {
 	{210, 124, 8},
 	{156, 169, 8},
@@ -50,7 +43,19 @@ local CONSTANT_CHEST_SPAWN = {
 	{131, 251, 7}
 }
 
--- DON'T CHANGE, UNLESS YOU KNOW WHAT YOU ARE DOING
+FIRE_SPAWN_TIME = 120000 -- amount of time it takes to start spawn fire after event starts
+
+-- for tests
+-- local ROYALE_MAP_ZONES = {
+	-- {171, 203, 186, 217}
+-- }
+
+-- local royaleMapXSize = {171, 203}
+-- local royaleMapYSize = {186, 217}
+
+thanks = "Thank you for participating in Battle Royale"
+
+-- index number for given stat
 local SKILL_PERCENTAGE = 1
 local SKILL_LEVEL = 2
 local SKILL_TRIES = 3
@@ -61,17 +66,13 @@ local REMOVED_EXP = 7
 local SKULL_TIME = 8
 local SKULL = 9
 local VOCATION = 10
--- local SKILL_PERCENTAGE = "skill_percent"
--- local SKILL_LEVEL = "skill_level"
--- local SKILL_TRIES = "skill_tries"
--- local LEVEL = "level"
--- local MAX_HP = "max_hp"
--- local MAX_MP = "max_mp"
--- local REMOVED_EXP = "removed_exp"
--- local SKULL_TIME = "skull_time"
--- local SKULL = "skull"
--- local VOCATION = "vocation"
 
+---
+--- functions
+---
+
+-- teleports player to random pos inside battle royale map
+-- only z=7
 function teleportPlayerToRoyale(player)
 	local x = math.random(royaleMapXSize[1], royaleMapXSize[2])
 	local y = math.random(royaleMapYSize[1], royaleMapYSize[2])
@@ -89,6 +90,7 @@ function teleportPlayerToRoyale(player)
 	end
 end
 
+-- moves all player items to depot
 function moveItemsToDepot(player)
 	local depot = player:getDepotChest(1, true)--:getItem(0)
 	for i = CONST_SLOT_HEAD, CONST_SLOT_AMMO do
@@ -99,6 +101,8 @@ function moveItemsToDepot(player)
 	end
 end
 
+-- moves all player items to his position
+-- main purpose is to remove winner items
 function moveItemsToPosition(player)
 	local pos = player:getPosition()
 	for i = CONST_SLOT_HEAD, CONST_SLOT_AMMO do
@@ -109,6 +113,7 @@ function moveItemsToPosition(player)
 	end
 end
 
+-- stores player stats
 function getPlayerStatsInfo(player)
 	local skullTimeVal = player:getSkullTime()
 	local levelVal = player:getLevel()
@@ -142,6 +147,7 @@ function getPlayerStatsInfo(player)
 	return statsTable
 end
 
+-- sets player stats back
 function setPlayerStatsBack(player, statsTable)
 	player:setVocation(statsTable.vocation)
 	if statsTable.removedExp > 0 then
@@ -158,6 +164,7 @@ function setPlayerStatsBack(player, statsTable)
 	end
 end
 
+-- removes player conditions
 function removeAllConditions(player)
 	for condition = CONDITION_POISON, CONDITION_SPELLGROUPCOOLDOWN do
 		if player:hasCondition(condition) then
@@ -166,25 +173,30 @@ function removeAllConditions(player)
 	end
 end
 
+-- remove all blessings
 function removeBlessing(player)
-	for i = 1, 6 do
+	for i = 1, 8 do
 		player:removeBlessing(i)
 	end
 end
 
+-- gives all blessings to player
 function giveBlessing(player)
-	for i = 1, 6 do
+	for i = 1, 8 do
 		player:addBlessing(i)
 	end
 end
 
+-- sets hp and mana for player for br game
 function setHPAndMana(player)
-	player:setMaxHealth(BRMaxHP)
-	player:setHealth(BRMaxHP)
-	player:setMaxMana(BRMaxMana)
-	player:setMana(BRMaxMana)
+	player:setMaxHealth(BR_MAX_HP)
+	player:setHealth(BR_MAX_HP)
+	player:setMaxMana(BR_MAX_MP)
+	player:setMana(BR_MAX_MP)
 end
 
+-- gives reward for player
+-- todo: make it reward winner
 function rewardPlayer(player, totalPlayerCount, place, goldPool)
 	local message = "You have taken " .. tostring(place) .. " place.\n"
 	local prize = calculateGoldPrize(totalPlayerCount, place - 1, goldPool)
@@ -207,10 +219,12 @@ function rewardPlayer(player, totalPlayerCount, place, goldPool)
 	insertMessage(playerId, message, MESSAGE_INFO_DESCR)
 end
 
+-- adds coins for player
 function addPremiumPointsForPlayer(playerGUID, points)
 	db.asyncQuery("UPDATE accounts a LEFT JOIN players p on a.id = p.account_id SET coins = coins + " .. db.escapeString(points) .." where p.id= " .. db.escapeString(playerGUID))
 end
 
+-- computes gold prize for player at taken place
 function calculateGoldPrize(totalPlayerCount, actualPlayersCount, goldPool)
 	local percent = (actualPlayersCount * 100)/totalPlayerCount
 	percent = (100 - percent)/100
@@ -218,24 +232,25 @@ function calculateGoldPrize(totalPlayerCount, actualPlayersCount, goldPool)
 	return prize
 end
 
+-- register event for player
 function registerEvent(player, eventName)
 	if player:registerEvent(eventName) then
 		print("Event " .. eventName .. " registered successfully for player " .. player:getName())
 	end
 end
 
+-- removes player event
 function unregisterEvent(player, eventName)
 	if player:unregisterEvent(eventName) then
 		print("Event " .. eventName .. " unregistered successfully for player " .. player:getName())
 	end
 end
 
-
+-- spawns fire on battle royale map, circle by circle
 function spawnFire(minusRadius, fireID)
 	if not brGame.isBattle then
 		return false
 	end
-	--royaleMinusRadiusOnFire = (fireID == 1493)
 	local radius = royaleMapRadius - minusRadius
 	for z = TOP_LEVEL_STRUCTURE, LOWEST_LEVEL_STRUCTURE do
 		for a = 1, 1440 do
@@ -266,6 +281,7 @@ function spawnFire(minusRadius, fireID)
 	return true
 end
 
+-- picks place for chest spawning
 function spawnChests()
 	spawnConstantChests()
 	for i = 1, #ROYALE_MAP_ZONES do
@@ -283,26 +299,28 @@ function spawnChests()
 						end
 					end
 				end
-		until count == royaleQuadrandChestsCount
+		until count == royaleZoneChestsCount
 	end
 	count = 0
 end
 
+-- spawn constant chests
 function spawnConstantChests()
 	for i = 1, #CONSTANT_CHEST_SPAWN do
 		createChest(CONSTANT_CHEST_SPAWN[i][1], CONSTANT_CHEST_SPAWN[i][2], CONSTANT_CHEST_SPAWN[i][3])
 	end
 end
 
+-- creates chest at x, y, z pos
 function createChest(x, y, z)
-
 	local chest = Game.createItem(27531, 1, Position(x, y, z))
-	local itemsInChest = math.random(maxItemsInChest)
-	for i = 1, 5 do -- todo: local constant
+	--local itemsInChest = math.random(maxItemsInChest)
+	for i = 1, itemsInChest do
 		chest = addRandomItemToChest(chest)
 	end
 end
 
+-- add item to chest, item cannot repeat
 function addRandomItemToChest(chest)
 	local item = getItem()
 	if chest:getItemCountById(item) ~= 0 then
@@ -313,6 +331,7 @@ function addRandomItemToChest(chest)
 	return chest
 end
 
+-- draw item
 function getItem()
 	local itemClass = math.random(10)
 	if 0 <= itemClass and itemClass <= 5 then -- common items
@@ -324,6 +343,7 @@ function getItem()
 	end
 end
 
+-- clean br map, removes: chests, small and big fire, monsters
 function cleanBattleRoyaleMap()
 	for z = TOP_LEVEL_STRUCTURE, LOWEST_LEVEL_STRUCTURE do
 		for r = 1, royaleMapRadius do
@@ -365,21 +385,25 @@ function cleanBattleRoyaleMap()
 	end
 end
 
+-- gives player bonus exp time
 function giveBonusExp(player, hours)
 	local plusTime = hours * 60 * 60
 	db.asyncQuery("UPDATE players SET bonusexp = " .. db.escapeString(os.time() + plusTime) .. " WHERE id = " .. db.escapeString(player:getGuid()))
 end
 
+-- teleports player to temple
 function teleportToTemple(player)
 	local templePosition = player:getTown():getTemplePosition()
 	player:teleportTo(templePosition, false)
 end
 
+-- reset skull for player
 function resetSkull(player)
 	player:setSkull(SKULL_NONE)
 	player:setSkullTime(0)
 end
 
+-- add message which is diplayed to player after his death in br mode
 function insertMessage(playerID, message, messageType)
 	db.asyncQuery("INSERT INTO `battle_royale_reward_msg` (`player_id`, `message`, `message_type`) VALUES (" .. db.escapeString(playerID) .. ", " .. db.escapeString(message) .. ", " .. db.escapeString(messageType) ..")")
 end

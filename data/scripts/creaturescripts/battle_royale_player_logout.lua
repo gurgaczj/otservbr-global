@@ -6,7 +6,7 @@ function brPlayerOnLogout.onLogout(player)
 	end
 
 	if brGame.isBattle then
-		if brGame.brPlayersInfo[player:getName()] ~= nil then
+		if brPlayersStats[player:getName()] ~= nil then
 			player:sendCancelMessage("You can not logout from battle royale.")
 			return false
 		end

@@ -483,9 +483,9 @@
 	</instant>
 
 	<!-- Battle Royale Runes -->
-	<rune group="attack" name="Monster Summoner Rune" id="26383" allowfaruse="1" charges="1" level="1" magiclevel="0" cooldown="10000" groupcooldown="10000" blocktype="solid" script="battle_royale/monster_summoner.lua" />
-	<rune group="attack" name="Poison Field Rune" id="26386" allowfaruse="1" charges="1" level="1" magiclevel="0" cooldown="5000" groupcooldown="5000" blocktype="solid" script="battle_royale/poison_field_rune.lua" />
-	<rune group="attack" name="Fire Field Rune" id="26387" allowfaruse="1" charges="1" level="1" magiclevel="0" cooldown="5000" groupcooldown="5000" blocktype="solid" script="battle_royale/fire_field_rune.lua" />
+	<rune group="attack" name="Monster Summoner Rune" id="38613" allowfaruse="1" charges="1" level="1" magiclevel="0" cooldown="10000" groupcooldown="10000" blocktype="solid" script="battle_royale/monster_summoner.lua" />
+	<rune group="attack" name="Poison Field Rune" id="38615" allowfaruse="1" charges="1" level="1" magiclevel="0" cooldown="5000" groupcooldown="5000" blocktype="solid" script="battle_royale/poison_field_rune.lua" />
+	<rune group="attack" name="Fire Field Rune" id="38614" allowfaruse="1" charges="1" level="1" magiclevel="0" cooldown="5000" groupcooldown="5000" blocktype="solid" script="battle_royale/fire_field_rune.lua" />
 
 	<!-- Attack Runes -->
 	<rune group="attack" spellid="26" name="Poison Field" id="2285" allowfaruse="1" charges="3" lvl="14" maglv="0" exhaustion="2000" groupcooldown="2000" blocktype="solid" script="attack/poison field.lua" />

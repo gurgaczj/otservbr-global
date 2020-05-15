@@ -49434,4 +49434,25 @@
 	<item id="40028" name="swamp" />
 	<item id="40035" name="tea" />
 	<item id="40043" name="mead" />
+	
+	<item id="38613" article="an" name="monster summoner">
+		<attribute key="type" value="rune" />
+		<attribute key="quicklootcategory" value="rune" />
+		<attribute key="weight" value="35" />
+		<attribute key="charges" value="1" />
+	</item>
+	
+	<item id="38614" article="a" name="fire field rune">
+		<attribute key="type" value="rune" />
+		<attribute key="quicklootcategory" value="rune" />
+		<attribute key="weight" value="70" />
+		<attribute key="charges" value="1" />
+	</item>
+	
+	<item id="38615" article="a" name="poison field rune">
+		<attribute key="type" value="rune" />
+		<attribute key="quicklootcategory" value="rune" />
+		<attribute key="weight" value="70" />
+		<attribute key="charges" value="1" />
+	</item>
 </items>

@@ -1,4 +1,4 @@
-BattleRoyale = {players = {}, canRegister = false, isBattle = false, brPlayersInfo = {}, playersCount = 0, goldPool = 0}
+BattleRoyale = {players = {}, canRegister = false, isBattle = false, playersCount = 0, goldPool = 0}
 
 function BattleRoyale:new (o, players, carReg, battle, info, count, pool, radius)
    o = o or {}
@@ -8,15 +8,16 @@ function BattleRoyale:new (o, players, carReg, battle, info, count, pool, radius
    self.players = players;
    self.canRegister = carReg;
    self.isBattle = battle;
-   self.brPlayersInfo = info;
    self.playersCount = count;
    self.goldPool = pool;
    return o
 end
+
 brGame = BattleRoyale:new(nil, {}, false, false, {}, 0, 1000000)
-brPlayersStats = {}
+brPlayersStats = {} -- players stats, global becouse used in onDeath event, I know, should have use getter
 local totalPlayerCount = 0 -- need to calculate gold reward for each player
 
+-- everything starts here, for each registered player
 function BattleRoyale:begin()
 	totalPlayerCount = #self.players
 	if totalPlayerCount == 1 then
@@ -29,6 +30,7 @@ function BattleRoyale:begin()
 
 	self.isBattle = true
 	spawnChests()
+	local minutesToBurn = tostring(FIRE_SPAWN_TIME / 1000 / 60)
 	for playerNum = 1, totalPlayerCount do
 		local actualPlayer = self.players[playerNum]
 		actualPlayer:save()
@@ -53,12 +55,13 @@ function BattleRoyale:begin()
 		registerEvent(actualPlayer, "BattleRoyaleHealthChange")
 		actualPlayer:addItem(1988, 1, false, 1, CONST_SLOT_WHEREEVER)
 		actualPlayer:setBattleRoyalePlayer(true);
-		actualPlayer:sendTextMessage(MESSAGE_STATUS_CONSOLE_BLUE, "Beware of fire. Island will start burning in 2 minutes!")
+		actualPlayer:sendTextMessage(MESSAGE_STATUS_WARNING, "Beware of fire. Island will start burning in " .. minutesToBurn .. " minutes!")
 	end
 
-	addEvent(spawnFire, 120000, 0, 1494)
+	addEvent(spawnFire, FIRE_SPAWN_TIME, 0, 1494)
 end
 
+-- after player death
 function BattleRoyale:playerDied(deadPlayer)
 	self:returnPlayerStats(deadPlayer)
 	local actualPlayersCount = #self.players
@@ -74,6 +77,7 @@ function BattleRoyale:playerDied(deadPlayer)
 	return true
 end
 
+-- return stats for player
 function BattleRoyale:returnPlayerStats(player)
 	unregisterEvent(player, "BattleRoyaleDeath")
 	unregisterEvent(player, "BattleRoyaleHealthChange")
@@ -86,6 +90,7 @@ function BattleRoyale:returnPlayerStats(player)
 	player:save()
 end
 
+-- reward winner
 function BattleRoyale:rewardWinner()
 	local player = self.players[1]
 	if player ~= nil then
@@ -98,7 +103,7 @@ function BattleRoyale:rewardWinner()
 		bankBalance = bankBalance + self.goldPool
 		player:setBankBalance(bankBalance)
 		addPremiumPointsForPlayer(player:getGuid(), 150)
-		player:sendTextMessage(MESSAGE_INFO_DESCR, "Outstanding, you have earned yourself 150 tibia coins and 24 hours of 50% bonus experience.")
+		player:sendTextMessage(MESSAGE_INFO_DESCR, "Outstanding, you have earned yourself 150 tibia coins and 24 hours of 50% bonus experience.\n" .. thanks)
 		player:removeAllConditions()
 		teleportToTemple(player)
 		player:setSkillLoss(true)
@@ -110,6 +115,7 @@ function BattleRoyale:rewardWinner()
 	end
 end
 
+-- reset br state
 function BattleRoyale:reset()
 	cleanBattleRoyaleMap()
 	brPlayersStats = {}
@@ -118,6 +124,7 @@ function BattleRoyale:reset()
 	brGame = BattleRoyale:new(nil, {}, false, false, {}, 0, 1000000)
 end
 
+-- adds player
 function BattleRoyale:addPlayer(player)
 	if self.canRegister then
 		if self:alreadyRegistered(player) then
@@ -131,6 +138,7 @@ function BattleRoyale:addPlayer(player)
 	end
 end
 
+-- remove player
 function BattleRoyale:removePlayer(playerName)
 	for i = 1, #self.players do
 		if self.players[i]:getName() == playerName then
@@ -141,6 +149,7 @@ function BattleRoyale:removePlayer(playerName)
 	return false
 end
 
+-- checks if player is already registered
 function BattleRoyale:alreadyRegistered(player)
 	for _, p in ipairs(self.players) do
 		if p:getName() == player:getName() then
@@ -150,10 +159,12 @@ function BattleRoyale:alreadyRegistered(player)
 	return false
 end
 
+-- allows register
 function BattleRoyale:startRegister()
 	self.canRegister = true
 end
 
+-- closes register
 function BattleRoyale:closeRegister()
 	self.canRegister = false
 end

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <monsters>
+	<!--	Battle Royale Custom Monsters-->
+	<monster name="Fire Elemental BR" file="Battle_Royale/fire_elemental.xml" />
+
 	<!-- Others -->
 	<monster name="Black Cobra" file="others/black_cobra.xml"/>
 	<monster name="Cart Packed with Gold" file="others/cart_packed_with_gold.xml"/>
