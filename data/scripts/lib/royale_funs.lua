@@ -20,7 +20,7 @@ local totalPlayerCount = 0 -- need to calculate gold reward for each player
 -- everything starts here, for each registered player
 function BattleRoyale:begin()
 	totalPlayerCount = #self.players
-	if totalPlayerCount == 1 then
+	if totalPlayerCount == 1 or totalPlayerCount == 0 then
 		broadcastMessage("Only one player signed for BattleRoyale. No match today :/", MESSAGE_STATUS_CONSOLE_BLUE)
 		self:reset()
 		return
