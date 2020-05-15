@@ -888,6 +888,7 @@ class LuaScriptInterface
 		static int luaPlayerAddMana(lua_State* L);
 		static int luaPlayerGetMaxMana(lua_State* L);
 		static int luaPlayerSetMaxMana(lua_State* L);
+		static int luaPlayerSetMana(lua_State* L);
 		static int luaPlayerGetManaSpent(lua_State* L);
 		static int luaPlayerAddManaSpent(lua_State* L);
 
@@ -1045,6 +1046,12 @@ class LuaScriptInterface
 
 		static int luaPlayerGetClient(lua_State* L);
 
+		static int luaPlayerRemoveAllConditions(lua_State* L);
+		static int luaPlayerSetSkillValues(lua_State* L);
+		static int luaPlayerResetSkills(lua_State* L);
+		static int luaPlayerRemoveUnjustifiedKill(lua_State* L);
+		static int luaPlayerSetBattleRoyalePlayer(lua_State* L);
+
 		static int luaPlayerGetHouse(lua_State* L);
 		static int luaPlayerSendHouseWindow(lua_State* L);
 		static int luaPlayerSetEditHouse(lua_State* L);
@@ -1064,6 +1071,7 @@ class LuaScriptInterface
 
 		static int luaPlayerGetBaseXpGain(lua_State *L);
 		static int luaPlayerSetBaseXpGain(lua_State *L);
+		static int luaPlayerSetBonusExp(lua_State* L);
 		static int luaPlayerGetVoucherXpBoost(lua_State *L);
 		static int luaPlayerSetVoucherXpBoost(lua_State *L);
 		static int luaPlayerGetGrindingXpBoost(lua_State *L);

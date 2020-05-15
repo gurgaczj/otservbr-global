@@ -137,6 +137,7 @@ CREATE TABLE IF NOT EXISTS `players` (
   `marriage_status` bigint(20) UNSIGNED NOT NULL DEFAULT '0',
   `marriage_spouse` int(11) NOT NULL DEFAULT '-1',
   `bonus_rerolls` bigint(21) NOT NULL DEFAULT '0',
+  `bonusexp` bigint(20) UNSIGNED DEFAULT '0',
   INDEX `account_id` (`account_id`),
   INDEX `vocation` (`vocation`),
   CONSTRAINT `players_pk` PRIMARY KEY (`id`),
@@ -796,6 +797,39 @@ CREATE TABLE IF NOT EXISTS `prey_slots` (
     ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure `battle_royale_scores`
+--
+
+CREATE TABLE IF NOT EXISTS `battle_royale_scores` (
+  `player_id` int(11) NOT NULL,
+  `wins` smallint(5) DEFAULT '0',
+  INDEX `player_id` (`player_id`),
+  CONSTRAINT `battle_royale_scores_fk`
+    FOREIGN KEY (`player_id`) REFERENCES `players` (`id`)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure `battle_royale_reward_msg`
+--
+
+CREATE TABLE IF NOT EXISTS `battle_royale_reward_msg` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	`player_id` int(11) NOT NULL,
+	`message` varchar(512) NOT NULL,
+	`message_type` tinyint(2) NOT NULL,
+	`unreaded` tinyint(1) NOT NULL DEFAULT '1',
+	INDEX `player_id` (`player_id`),
+	CONSTRAINT `battle_royale_reward_msg_fk`
+		FOREIGN KEY (`player_id`) REFERENCES `players` (`id`)
+		ON DELETE CASCADE,
+	PRIMARY KEY(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 

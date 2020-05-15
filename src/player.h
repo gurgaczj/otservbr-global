@@ -1364,6 +1364,13 @@ class Player final : public Creature, public Cylinder
 		void onEquipImbueItem(Imbuement* imbuement);
 		void onDeEquipImbueItem(Imbuement* imbuement);
 
+		void removeAllConditions();
+		void setSkillValues(uint16_t skill, uint16_t skillLevel, uint16_t skillPercent, uint16_t skillTries);
+		void resetSkills();
+		void setBonusExpTime(uint64_t bonusExpTime);
+		uint64_t getBonusExpTime();
+		void removeUnjustifiedKill(uint32_t killID);
+
 		//Custom: Anti bug do market
 		bool isMarketExhausted() const;
 		void updateMarketExhausted() {
@@ -1482,6 +1489,7 @@ class Player final : public Creature, public Cylinder
 		Position loginPosition;
 		Position lastWalkthroughPosition;
 
+		time_t bonusExpTime = 0;
 		time_t lastLoginSaved = 0;
 		time_t lastLogout = 0;
 
@@ -1599,6 +1607,7 @@ class Player final : public Creature, public Cylinder
 		bool isConnecting = false;
 		bool addAttackSkillPoint = false;
 		bool inventoryAbilities[CONST_SLOT_LAST + 1] = {};
+		bool isBattleRoyalePlayer = false;
 
 		static uint32_t playerAutoID;
 

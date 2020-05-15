@@ -26,6 +26,7 @@ end
 function onLogin(player)
 	local loginStr = 'Welcome to ' .. configManager.getString(configKeys.SERVER_NAME) .. '!'
 	if player:getLastLoginSaved() <= 0 then
+		db.asyncQuery("INSERT INTO `battle_royale_scores` (`player_id`) VALUES (" .. db.escapeString(player:getGuid()) .. ")")
 		loginStr = loginStr .. ' Please choose your outfit.'
 		player:sendOutfitWindow()
 	else

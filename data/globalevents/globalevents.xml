@@ -36,4 +36,5 @@
 	<globalevent name="furygates" type="startup" script="worldchanges/fury_gates.lua" />
 	<globalevent name="theirmastersvoice" type="startup" script="worldchanges/their_masters_voice.lua" />
 	<globalevent type="startup" name="yasir" script="worldchanges/yasir.lua"/>
+	<globalevent type="startup" name="royale" script="worldchanges/royale.lua"/>
 </globalevents>

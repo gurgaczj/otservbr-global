@@ -3593,7 +3593,7 @@ void Player::onAttackedCreature(Creature* target)
 			if (!Combat::isInPvpZone(this, targetPlayer) && !isInWar(targetPlayer)) {
 				addAttacked(targetPlayer);
 
-				if (targetPlayer->getSkull() == SKULL_NONE && getSkull() == SKULL_NONE && !targetPlayer->hasKilled(this)) {
+				if (targetPlayer->getSkull() == SKULL_NONE && getSkull() == SKULL_NONE && !targetPlayer->hasKilled(this) && !isBattleRoyalePlayer) {
 					setSkull(SKULL_WHITE);
 				}
 
@@ -3715,6 +3715,10 @@ void Player::gainExperience(uint64_t gainExp, Creature* source)
 		return;
 	}
 
+	if (bonusExpTime >= time(nullptr)) {
+		gainExp = gainExp + (gainExp * 0.5);
+	}
+
 	addExperience(source, gainExp, true);
 }
 
@@ -3723,6 +3727,7 @@ void Player::onGainExperience(uint64_t gainExp, Creature* target)
 	if (hasFlag(PlayerFlag_NotGainExperience)) {
 		return;
 	}
+	
 
 	if (target && !target->getPlayer() && party && party->isSharedExperienceActive() && party->isSharedExperienceEnabled()) {
 		party->shareExperience(gainExp, target);
@@ -4016,7 +4021,7 @@ void Player::clearAttacked()
 
 void Player::addUnjustifiedDead(const Player* attacked)
 {
-	if (hasFlag(PlayerFlag_NotGainInFight) || attacked == this || g_game.getWorldType() == WORLD_TYPE_PVP_ENFORCED) {
+	if (hasFlag(PlayerFlag_NotGainInFight) || attacked == this || g_game.getWorldType() == WORLD_TYPE_PVP_ENFORCED || isBattleRoyalePlayer) {
 		return;
 	}
 
@@ -4029,6 +4034,9 @@ void Player::addUnjustifiedDead(const Player* attacked)
 	uint8_t monthKills = 0;
 
 	for (const auto& kill : unjustifiedKills) {
+		if (!kill.unavenged) {
+			continue;
+		}
 		const auto diff = time(nullptr) - kill.time;
 		if (diff <= 4 * 60 * 60) {
 			dayKills += 1;
@@ -4325,6 +4333,9 @@ void Player::sendUnjustifiedPoints()
 		double monthKills = 0;
 
 		for (const auto& kill : unjustifiedKills) {
+			if (!kill.unavenged) {
+				continue;
+			}
 			const auto diff = time(nullptr) - kill.time;
 			if (diff <= 24 * 60 * 60) {
 				dayKills += 1;
@@ -4922,4 +4933,48 @@ void Player::onDeEquipImbueItem(Imbuement* imbuement)
 	}
 
 	return;
+}
+
+void Player::removeAllConditions()
+{
+	for (Condition* condition : conditions) {
+		removeCondition(condition);
+	}
+}
+
+void Player::setSkillValues(uint16_t skill, uint16_t skillLevel, uint16_t skillPercent, uint16_t skillTries) {
+	skills[skill].level = skillLevel;
+	skills[skill].percent = skillPercent;
+	skills[skill].tries = skillTries;
+}
+
+void Player::resetSkills() {
+	for (uint16_t skill = SKILL_FIST; skill <= SKILL_FISHING; skill++) {
+		setSkillValues(skill, 10, 0, 0);
+	}
+}
+
+void Player::setBonusExpTime(uint64_t bonusExpTime) {
+	if (this->bonusExpTime > time(nullptr))
+	{
+		this->bonusExpTime += bonusExpTime;
+	}
+	else {
+		this->bonusExpTime = time(nullptr) + bonusExpTime;
+	}
+}
+
+uint64_t Player::getBonusExpTime() {
+	
+	return bonusExpTime;
+}
+
+void Player::removeUnjustifiedKill(uint32_t killID) {
+	for (auto& kill : unjustifiedKills) {
+		if (kill.target == killID && kill.unavenged) {
+			kill.unavenged = false;
+			break;
+		}
+	}
+	sendUnjustifiedPoints();
 }

@@ -2456,6 +2456,7 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("Player", "addMana", LuaScriptInterface::luaPlayerAddMana);
 	registerMethod("Player", "getMaxMana", LuaScriptInterface::luaPlayerGetMaxMana);
 	registerMethod("Player", "setMaxMana", LuaScriptInterface::luaPlayerSetMaxMana);
+	registerMethod("Player", "setMana", LuaScriptInterface::luaPlayerSetMana);
 	registerMethod("Player", "getManaSpent", LuaScriptInterface::luaPlayerGetManaSpent);
 	registerMethod("Player", "addManaSpent", LuaScriptInterface::luaPlayerAddManaSpent);
 
@@ -2584,6 +2585,13 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("Player", "isPzLocked", LuaScriptInterface::luaPlayerIsPzLocked);
 
 	registerMethod("Player", "getClient", LuaScriptInterface::luaPlayerGetClient);
+
+	registerMethod("Player", "removeAllConditions", LuaScriptInterface::luaPlayerRemoveAllConditions);
+	registerMethod("Player", "setSkillValues", LuaScriptInterface::luaPlayerSetSkillValues);
+	registerMethod("Player", "resetSkills", LuaScriptInterface::luaPlayerResetSkills);
+	registerMethod("Player", "removeUnjustifiedKill", LuaScriptInterface::luaPlayerRemoveUnjustifiedKill);
+	registerMethod("Player", "setBattleRoyalePlayer", LuaScriptInterface::luaPlayerSetBattleRoyalePlayer);
+	
 	
 	// New prey
 	// GET
@@ -2630,6 +2638,7 @@ void LuaScriptInterface::registerFunctions()
 
 	registerMethod("Player", "getBaseXpGain", LuaScriptInterface::luaPlayerGetBaseXpGain);
 	registerMethod("Player", "setBaseXpGain", LuaScriptInterface::luaPlayerSetBaseXpGain);
+	registerMethod("Player", "setBonusExp", LuaScriptInterface::luaPlayerSetBonusExp);
 	registerMethod("Player", "getVoucherXpBoost", LuaScriptInterface::luaPlayerGetVoucherXpBoost);
 	registerMethod("Player", "setVoucherXpBoost", LuaScriptInterface::luaPlayerSetVoucherXpBoost);
 	registerMethod("Player", "getGrindingXpBoost", LuaScriptInterface::luaPlayerGetGrindingXpBoost);
@@ -8947,6 +8956,21 @@ int LuaScriptInterface::luaPlayerSetMaxMana(lua_State* L)
 	return 1;
 }
 
+int LuaScriptInterface::luaPlayerSetMana(lua_State* L)
+{
+	// player:setMana(maxMana)
+	Player* player = getPlayer(L, 1);
+	if (player) {
+		player->mana = getNumber<int32_t>(L, 2);
+		player->sendStats();
+		pushBoolean(L, true);
+	}
+	else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
 int LuaScriptInterface::luaPlayerGetManaSpent(lua_State* L)
 {
 	// player:getManaSpent()
@@ -10954,6 +10978,91 @@ int LuaScriptInterface::luaPlayerGetClient(lua_State* L)
 	return 1;
 }
 
+int LuaScriptInterface::luaPlayerRemoveAllConditions(lua_State* L)
+{
+	// player:getClient()
+	Player* player = getUserdata<Player>(L, 1);
+	if (player) {
+		player->removeAllConditions();
+	}
+	else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerSetSkillValues(lua_State* L)
+{
+	// player:getClient()
+	Player* player = getUserdata<Player>(L, 1);
+	if (player) {
+		uint16_t skill = getNumber<uint16_t>(L, 2);
+		uint16_t skillLevel = getNumber<uint16_t>(L, 3);
+		uint16_t skillPercent = getNumber<uint16_t>(L, 4);
+		uint16_t skillTries = getNumber<uint16_t>(L, 5);
+
+		player->setSkillValues(skill, skillLevel, skillPercent, skillTries);
+		player->sendSkills();
+
+		pushBoolean(L, true);
+	}
+	else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerResetSkills(lua_State* L)
+{
+	// player:getClient()
+	Player* player = getUserdata<Player>(L, 1);
+	if (player) {
+
+		player->resetSkills();
+		player->sendStats();
+
+		pushBoolean(L, true);
+	}
+	else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+
+int LuaScriptInterface::luaPlayerRemoveUnjustifiedKill(lua_State* L)
+{
+	// player:removeUnjustifiedKill()
+	Player* killer = getUserdata<Player>(L, 1);
+	uint32_t targetID = getNumber<uint32_t>(L, 2);
+	if (killer && targetID > 0) {
+		
+		killer->removeUnjustifiedKill(targetID);
+		killer->sendStats();
+
+		pushBoolean(L, true);
+	}
+	else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerSetBattleRoyalePlayer(lua_State* L)
+{
+	// player:setBattleRoyalePlayer(true/false)
+	Player* player = getUserdata<Player>(L, 1);
+	if (player) {
+		player->isBattleRoyalePlayer = getBoolean(L, 2);
+	
+		pushBoolean(L, true);
+	}
+	else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
 int LuaScriptInterface::luaPlayerGetHouse(lua_State* L)
 {
 	// player:getHouse()
@@ -11214,6 +11323,20 @@ int LuaScriptInterface::luaPlayerSetBaseXpGain(lua_State *L)
 		player->sendStats();
 		pushBoolean(L, true);
 	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerSetBonusExp(lua_State* L)
+{
+	// player:setBaseXpGain(value)
+	Player* player = getUserdata<Player>(L, 1);
+	if (player) {
+		player->setBonusExpTime(getNumber<uint64_t>(L, 2));
+		pushBoolean(L, true);
+	}
+	else {
 		lua_pushnil(L);
 	}
 	return 1;
