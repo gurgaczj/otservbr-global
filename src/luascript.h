@@ -888,18 +888,19 @@ class LuaScriptInterface
 		static int luaPlayerAddMana(lua_State* L);
 		static int luaPlayerGetMaxMana(lua_State* L);
 		static int luaPlayerSetMaxMana(lua_State* L);
-		static int luaPlayerSetMana(lua_State* L);
 		static int luaPlayerGetManaSpent(lua_State* L);
 		static int luaPlayerAddManaSpent(lua_State* L);
 
 		static int luaPlayerGetBaseMaxHealth(lua_State* L);
 		static int luaPlayerGetBaseMaxMana(lua_State* L);
 
+		static int luaPlayerSetMana(lua_State* L);
 		static int luaPlayerGetSkillLevel(lua_State* L);
 		static int luaPlayerGetEffectiveSkillLevel(lua_State* L);
 		static int luaPlayerGetSkillPercent(lua_State* L);
 		static int luaPlayerGetSkillTries(lua_State* L);
 		static int luaPlayerAddSkillTries(lua_State* L);
+		static int luaPlayerSetBaseMagicLevel(lua_State* L);
 
 		static int luaPlayerAddOfflineTrainingTime(lua_State* L);
 		static int luaPlayerGetOfflineTrainingTime(lua_State* L);

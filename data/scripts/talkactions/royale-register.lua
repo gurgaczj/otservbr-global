@@ -1,7 +1,6 @@
 local maxHealth = TalkAction("!health")
 function maxHealth.onSay(player, words, param)
-	print(Prey.Credits)
-	print("player " .. player:getName() .. " max health: " .. player:getMaxHealth() .. " max mana: " .. player:getMaxMana())
+	print(player:getSkillLevel(SKILL_MAGLEVEL))
 end
 
 maxHealth:separator(" ")
@@ -158,19 +157,9 @@ resetBR:register()
 
 local setlvl = TalkAction("!level")
 function setlvl.onSay(player, words, param)
-	-- player:sendTextMessage(MESSAGE_STATUS_CONSOLE_BLUE, "Your lvl = " .. player:getLevel())
-	-- local minusExp = tonumber(player:getExperience()) - 4200
-	player:setSkillValues(SKILL_SWORD, 120, 0, 0)
-	player:setSkillValues(SKILL_AXE, 120, 0, 0)
-	player:setSkillValues(SKILL_CLUB, 120, 0, 0)
-	-- player:removeExperience(minusExp, true)
-	-- player:addSkillTries(SKILL_CLUB, 10)
-	-- player:addSkillTries(SKILL_SWORD, 10)
-	-- player:addSkillTries(SKILL_AXE, 10)
-	-- player:addSkillTries(SKILL_DISTANCE, 10)
-	-- player:addSkillTries(SKILL_SHIELD, 10)
-	-- player:addSkillTries(SKILL_FISHING, 10)
-	-- print(tostring(SKILL_FIST) .. " " .. tostring(SKILL_FISHING))
+	player:setSkillValues(SKILL_SWORD, 80, 0, 0)
+	player:setSkillValues(SKILL_AXE, 80, 0, 0)
+	player:setSkillValues(SKILL_CLUB, 80, 0, 0)
 	player:sendTextMessage(MESSAGE_STATUS_CONSOLE_BLUE, "Your lvl = " .. player:getLevel())
 end
 

@@ -4,18 +4,16 @@ combat:setParameter(COMBAT_PARAM_DISTANCEEFFECT, CONST_ANI_ENERGYBALL)
 combat:setArea(createCombatArea(AREA_SQUARE1X1))
 
 local COMMON_MONSTERS = {
-	"rat",
-	"bug",
-	"troll"
+	"minotaur"
 }
 
 local LESS_COMMON_MONSTERS = {
-	"minotaur",
-	"orc"
+	"giant spider br"
 }
 
 local RARE_MONSTERS = {
-	"fire elemental br"
+	"fire elemental br",
+	
 }
 
 function onCastSpell(creature, variant, isHotkey)

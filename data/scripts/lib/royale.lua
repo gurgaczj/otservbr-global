@@ -1,27 +1,26 @@
-BattleRoyale = {players = {}, canRegister = false, isBattle = false, playersCount = 0, goldPool = 0}
+BattleRoyale = {players = {}, canRegister = false, isBattle = false, goldPool = 0}
 
-function BattleRoyale:new (o, players, carReg, battle, info, count, pool, radius)
+function BattleRoyale:new (o, players, canReg, battle, pool)
    o = o or {}
    setmetatable(o, self)
    self.__index = self
    table = table or {}
    self.players = players;
-   self.canRegister = carReg;
+   self.canRegister = canReg;
    self.isBattle = battle;
-   self.playersCount = count;
    self.goldPool = pool;
    return o
 end
 
-brGame = BattleRoyale:new(nil, {}, false, false, {}, 0, 1000000)
+brGame = BattleRoyale:new(nil, {}, false, false, 1000000)
 brPlayersStats = {} -- players stats, global becouse used in onDeath event, I know, should have use getter
 local totalPlayerCount = 0 -- need to calculate gold reward for each player
 
--- everything starts here, for each registered player
+-- everything starts here
 function BattleRoyale:begin()
 	totalPlayerCount = #self.players
-	if totalPlayerCount == 1 or totalPlayerCount == 0 then
-		broadcastMessage("Only one player signed for BattleRoyale. No match today :/", MESSAGE_STATUS_CONSOLE_BLUE)
+	if totalPlayerCount <= 1 then
+		broadcastMessage("Not enough players for BattleRoyale. Need at least 2. No match today :/", MESSAGE_STATUS_CONSOLE_BLUE)
 		self:reset()
 		return
 	end
@@ -30,13 +29,12 @@ function BattleRoyale:begin()
 
 	self.isBattle = true
 	spawnChests()
-	local minutesToBurn = tostring(FIRE_SPAWN_TIME / 1000 / 60)
+	-- for each registered player
 	for playerNum = 1, totalPlayerCount do
 		local actualPlayer = self.players[playerNum]
 		actualPlayer:save()
 		local playerID = actualPlayer:getName()
 		brPlayersStats[playerID] = getPlayerStatsInfo(actualPlayer)
-		teleportPlayerToRoyale(actualPlayer)
 		actualPlayer:removeAllConditions()
 		local playerParty = actualPlayer:getParty()
 		if playerParty ~= nil then
@@ -46,16 +44,18 @@ function BattleRoyale:begin()
 		actualPlayer:setVocation(4)
 		setHPAndMana(actualPlayer)
 		actualPlayer:setSkillLoss(false)
-		moveItemsToDepot(actualPlayer)
 		actualPlayer:resetSkills() -- remove player skills
-		actualPlayer:setSkillValues(1, 40, 0, 0)
-		actualPlayer:setSkillValues(2, 40, 0, 0)
-		actualPlayer:setSkillValues(3, 40, 0, 0)
+		actualPlayer:setSkillValues(1, 70, 0, 0)
+		actualPlayer:setSkillValues(2, 70, 0, 0)
+		actualPlayer:setSkillValues(3, 70, 0, 0)
+		actualPlayer:setBaseMagicLevel(3)
+		actualPlayer:setBattleRoyalePlayer(true);
+		teleportPlayerToRoyale(actualPlayer)
+		moveItemsToDepot(actualPlayer)
+		actualPlayer:addItem(1988, 1, false, 1, CONST_SLOT_WHEREEVER)
 		registerEvent(actualPlayer, "BattleRoyaleDeath")
 		registerEvent(actualPlayer, "BattleRoyaleHealthChange")
-		actualPlayer:addItem(1988, 1, false, 1, CONST_SLOT_WHEREEVER)
-		actualPlayer:setBattleRoyalePlayer(true);
-		actualPlayer:sendTextMessage(MESSAGE_STATUS_WARNING, "Beware of fire. Island will start burning in " .. minutesToBurn .. " minutes!")
+		actualPlayer:sendTextMessage(MESSAGE_STATUS_WARNING, "Beware of fire. Island will start burning in 2 minutes!")
 	end
 
 	addEvent(spawnFire, FIRE_SPAWN_TIME, 0, 1494)
@@ -64,6 +64,7 @@ end
 -- after player death
 function BattleRoyale:playerDied(deadPlayer)
 	self:returnPlayerStats(deadPlayer)
+	deadPlayer:removeAllConditions()
 	local actualPlayersCount = #self.players
 	for _, player in ipairs(self.players) do
 		if player:getName() == deadPlayer:getName() then
@@ -98,30 +99,33 @@ function BattleRoyale:rewardWinner()
 		moveItemsToPosition(player)
 		broadcastMessage("Player " .. player:getName() .. " won battle royale! Congratulations!", MESSAGE_STATUS_CONSOLE_BLUE)
 		self:returnPlayerStats(player)
-		player:sendTextMessage(MESSAGE_INFO_DESCR, "You have earned " .. tostring(self.goldPool) .. " gold. Check your bank balance")
+		local message = "You have earned " .. tostring(self.goldPool) .. " gold. Check your bank balance\n"
 		local bankBalance = player:getBankBalance()
 		bankBalance = bankBalance + self.goldPool
 		player:setBankBalance(bankBalance)
-		addPremiumPointsForPlayer(player:getGuid(), 150)
-		player:sendTextMessage(MESSAGE_INFO_DESCR, "Outstanding, you have earned yourself 150 tibia coins and 24 hours of 50% bonus experience.\n" .. thanks)
+		local playerId = player:getGuid()
+		addPremiumPointsForPlayer(playerId, 150)
+		message = message .. "Outstanding, you have earned yourself 150 tibia coins and 24 hours of 50% bonus experience.\n" .. thanks
+		player:sendTextMessage(MESSAGE_INFO_DESCR, message)
 		player:removeAllConditions()
 		teleportToTemple(player)
 		player:setSkillLoss(true)
 		giveBonusExp(player, 24)
 		player:addItem(1988, 1, false, 1, CONST_SLOT_WHEREEVER)
 		player:save()
-		db.asyncQuery("UPDATE battle_royale_scores SET wins = wins + 1 WHERE player_id = " .. db.escapeString(playerId))
-		-- self:reset()
+		db.asyncQuery("UPDATE `battle_royale_scores` SET `wins` = `wins` + 1 WHERE `player_id` = " .. db.escapeString(playerId))
+		self:reset()
 	end
 end
 
 -- reset br state
 function BattleRoyale:reset()
 	cleanBattleRoyaleMap()
+	self.isBattle = false
 	brPlayersStats = {}
 	brGame = nil
 	totalPlayerCount = 0
-	brGame = BattleRoyale:new(nil, {}, false, false, {}, 0, 1000000)
+	brGame = BattleRoyale:new(nil, {}, false, false, 1000000)
 end
 
 -- adds player

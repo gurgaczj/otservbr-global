@@ -2456,18 +2456,19 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("Player", "addMana", LuaScriptInterface::luaPlayerAddMana);
 	registerMethod("Player", "getMaxMana", LuaScriptInterface::luaPlayerGetMaxMana);
 	registerMethod("Player", "setMaxMana", LuaScriptInterface::luaPlayerSetMaxMana);
-	registerMethod("Player", "setMana", LuaScriptInterface::luaPlayerSetMana);
 	registerMethod("Player", "getManaSpent", LuaScriptInterface::luaPlayerGetManaSpent);
 	registerMethod("Player", "addManaSpent", LuaScriptInterface::luaPlayerAddManaSpent);
 
 	registerMethod("Player", "getBaseMaxHealth", LuaScriptInterface::luaPlayerGetBaseMaxHealth);
 	registerMethod("Player", "getBaseMaxMana", LuaScriptInterface::luaPlayerGetBaseMaxMana);
 
+	registerMethod("Player", "setMana", LuaScriptInterface::luaPlayerSetMana);
 	registerMethod("Player", "getSkillLevel", LuaScriptInterface::luaPlayerGetSkillLevel);
 	registerMethod("Player", "getEffectiveSkillLevel", LuaScriptInterface::luaPlayerGetEffectiveSkillLevel);
 	registerMethod("Player", "getSkillPercent", LuaScriptInterface::luaPlayerGetSkillPercent);
 	registerMethod("Player", "getSkillTries", LuaScriptInterface::luaPlayerGetSkillTries);
 	registerMethod("Player", "addSkillTries", LuaScriptInterface::luaPlayerAddSkillTries);
+	registerMethod("Player", "setBaseMagicLevel", LuaScriptInterface::luaPlayerSetBaseMagicLevel);
 
 	registerMethod("Player", "addOfflineTrainingTime", LuaScriptInterface::luaPlayerAddOfflineTrainingTime);
 	registerMethod("Player", "getOfflineTrainingTime", LuaScriptInterface::luaPlayerGetOfflineTrainingTime);
@@ -9082,6 +9083,22 @@ int LuaScriptInterface::luaPlayerAddSkillTries(lua_State* L)
 		player->addSkillAdvance(skillType, tries);
 		pushBoolean(L, true);
 	} else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerSetBaseMagicLevel(lua_State* L)
+{
+	// player:addSkillTries(skillType, tries)
+	Player* player = getUserdata<Player>(L, 1);
+	uint32_t baseMagLevel = getNumber<uint32_t>(L, 2);
+	if (player && baseMagLevel >= 0) {
+		player->magLevel = baseMagLevel;
+		player->sendSkills();
+		pushBoolean(L, true);
+	}
+	else {
 		lua_pushnil(L);
 	}
 	return 1;

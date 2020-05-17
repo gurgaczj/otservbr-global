@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <movements>
+	<!-- battle royale -->
+	<movevent event="Equip" itemid="38617" slot="ring" function="onEquipItem"/>
+	<movevent event="Equip" itemid="38618" slot="ring" function="onEquipItem"/>
+	<movevent event="DeEquip" itemid="38618" slot="ring" function="onDeEquipItem"/>
+	<movevent event="Equip" itemid="38616" slot="necklace" function="onEquipItem"/>
+	<movevent event="DeEquip" itemid="38616" slot="necklace" function="onDeEquipItem"/>
+
 	<!-- dawnport -->
 	<movevent event="StepIn" fromaid="20001" toaid="20004" script="dawnport/vocation_trial.lua"/>
 	<!-- oramond -->

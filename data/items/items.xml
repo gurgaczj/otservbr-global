@@ -49455,4 +49455,35 @@
 		<attribute key="weight" value="70" />
 		<attribute key="charges" value="1" />
 	</item>
+	<item id="38616" article="a" name="br protection amulet">
+		<attribute key="weight" value="550" />
+		<attribute key="slotType" value="necklace" />
+		<attribute key="quicklootcategory" value="amulet" />
+		<attribute key="charges" value="20" />
+		<attribute key="showcharges" value="1" />
+		<attribute key="absorbPercentPhysical" value="5" />
+		<attribute key="showattributes" value="1" />
+	</item>
+	<item id="38617" article="a" name="br ring of healing">
+		<attribute key="weight" value="80" />
+		<attribute key="slotType" value="ring" />
+		<attribute key="quicklootcategory" value="ring" />
+		<attribute key="transformEquipTo" value="38618" />
+		<attribute key="stopduration" value="1" />
+		<attribute key="showduration" value="1" />
+	</item>
+	<item id="38618" article="a" name="br ring of healing (faster regeneration)">
+		<attribute key="weight" value="80" />
+		<attribute key="slotType" value="ring" />
+		<attribute key="quicklootcategory" value="ring" />
+		<attribute key="decayTo" value="0" />
+		<attribute key="transformDeEquipTo" value="38617" />
+		<attribute key="duration" value="450" />
+		<attribute key="healthGain" value="4" />
+		<attribute key="healthTicks" value="5000" />
+		<attribute key="manaGain" value="3" />
+		<attribute key="manaTicks" value="5000" />
+		<attribute key="showduration" value="1" />
+		<attribute key="showattributes" value="1" />
+	</item>
 </items>

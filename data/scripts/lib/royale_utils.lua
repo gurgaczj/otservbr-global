@@ -7,20 +7,28 @@ local royaleMapYSize = {108, 289} -- min, max Y map size
 local royaleMapOrigin = {197, 202} -- map origin point
 local royaleMapRadius = 100 -- map radius
 local royaleZoneChestsCount = 30 -- number of chests in one zone -> explained later
-local itemsInChest = 4 -- number of items in chest
-local BR_MAX_HP = 300 -- hp value at the start
-local BR_MAX_MP = 30 -- mp value at the start
+local itemsInChest = 4 -- number of items in chest, make sure it is not greater than number of weapons of all rarity types
+local BR_MAX_HP = 500 -- hp value at the start
+local BR_MAX_MP = 300 -- mp value at the start
 
 local TOP_LEVEL_STRUCTURE = 6 -- top Z level walkable val
 local LOWEST_LEVEL_STRUCTURE = 8 -- lowest Z level walkable val
 
-local COMMON_ITEMS = {8704, 2643, 2649, 2461, 9814, 2401, 2380, 2384, 2666, 2674} -- common items ids
-local LESS_COMMON_ITEMS = {38615, 38614, 2398, 7457, 2412, 10301, 7618, 2789} -- less common ids
-local RARE_ITEMS = {38613, 2417, 3963, 2378} -- rare ids
+local COMMON_ITEMS = {8704, 7618, 2417, 2428, 20092, 2666, 2674, 2643, 2511} -- common items ids
+local LESS_COMMON_ITEMS = {38615, 38614, 7457, 7618, 2789, 2435, 7387, 2463, 2647, 2541, 7620, 7588, 38616} -- less common ids
+local RARE_ITEMS = {38613, 2451, 38617, 2521, 2476, 2477} -- rare ids
+
+-- these three copies weapon ids from upper item
+-- main purpose is to make sure that chest contains weapon
+local COMMON_WEAPONS = {2417, 20092, 2428}
+local LESS_COMMON_WEAPONS = {7387, 2435}
+local RARE_WEAPONS = {2451}
 
 -- Explanation. Fire spawn in circles. First small fire field and some time after small is replaced by big one
 local TIME_TO_SPAWN_BIG_FIRE = 4500 -- amount of time (ms) to spawn big fire after small
 local TIME_TO_SPAWN_SMALL_FIRE = 1900 -- amount of time to spawn small fire after big one
+
+local REMOVED_EXP = 7915800 -- exp amount which you want player to have on the beggining of br
 
 -- map divieded into square zones for better chest spawn distribution
 -- min X, max X, min Y, max Y
@@ -45,6 +53,8 @@ local CONSTANT_CHEST_SPAWN = {
 
 FIRE_SPAWN_TIME = 120000 -- amount of time it takes to start spawn fire after event starts
 
+thanks = "Thank you for participating in Battle Royale!"
+
 -- for tests
 -- local ROYALE_MAP_ZONES = {
 	-- {171, 203, 186, 217}
@@ -52,20 +62,6 @@ FIRE_SPAWN_TIME = 120000 -- amount of time it takes to start spawn fire after ev
 
 -- local royaleMapXSize = {171, 203}
 -- local royaleMapYSize = {186, 217}
-
-thanks = "Thank you for participating in Battle Royale"
-
--- index number for given stat
-local SKILL_PERCENTAGE = 1
-local SKILL_LEVEL = 2
-local SKILL_TRIES = 3
-local LEVEL = 4
-local MAX_HP = 5
-local MAX_MP = 6
-local REMOVED_EXP = 7
-local SKULL_TIME = 8
-local SKULL = 9
-local VOCATION = 10
 
 ---
 --- functions
@@ -119,10 +115,10 @@ function getPlayerStatsInfo(player)
 	local levelVal = player:getLevel()
 	local maxHealthVal = player:getMaxHealth()	
 	local maxManaVal = player:getMaxMana()	
-	local removedExpVal = player:getExperience() - 4300
+	local removedExpVal = player:getExperience() - REMOVED_EXP
 	if removedExpVal < 0 then
-		removedExpVal = removedExpVal * (-1)
-		player:addExperience(removedExpVal + 100)
+		removedExpVal = removedExpVal
+		player:addExperience(removedExpVal * (-1) + 100)
 	else
 		player:removeExperience(removedExpVal)
 	end
@@ -134,7 +130,8 @@ function getPlayerStatsInfo(player)
 		maxHealth = maxHealthVal,
 		maxMana = maxManaVal,
 		vocation = player:getVocation(),
-		skull = player:getSkull()
+		skull = player:getSkull(),
+		magicLevel = player:getBaseMagicLevel()
 	}
 	statsTable.Skills = {}
 	for i = SKILL_FIST, SKILL_FISHING do
@@ -152,6 +149,8 @@ function setPlayerStatsBack(player, statsTable)
 	player:setVocation(statsTable.vocation)
 	if statsTable.removedExp > 0 then
 		player:addExperience(statsTable.removedExp)
+	else
+		player:removeExperience(statsTable.removedExp * (-1))
 	end
 	player:setMaxMana(statsTable.maxMana)
 	player:setMaxHealth(statsTable.maxHealth)
@@ -159,6 +158,7 @@ function setPlayerStatsBack(player, statsTable)
 	player:setHealth(statsTable.maxHealth)
 	player:setSkullTime(statsTable.skullTime)
 	player:setSkull(statsTable.skull)
+	player:setBaseMagicLevel(statsTable.magicLevel)
 	for i = SKILL_FIST, SKILL_FISHING do
 		player:setSkillValues(i, statsTable.Skills[i].level, statsTable.Skills[i].percent, statsTable.Skills[i].tries)
 	end
@@ -266,9 +266,7 @@ function spawnFire(minusRadius, fireID)
 					end
 				end
 			end
-			--if royaleMapXSize[1] <= x and x <= royaleMapXSize[2] and royaleMapYSize[1] <= y and y <= royaleMapYSize[2] then
 			Game.createItem(fireID, 1, Position(x, y, z))
-			--end
 		end
 	end
 	if minusRadius ~= royaleMapRadius then
@@ -314,25 +312,42 @@ end
 -- creates chest at x, y, z pos
 function createChest(x, y, z)
 	local chest = Game.createItem(27531, 1, Position(x, y, z))
-	--local itemsInChest = math.random(maxItemsInChest)
 	for i = 1, itemsInChest do
-		chest = addRandomItemToChest(chest)
+		if i == 1 then
+			chest = addRandomWeaponToChest(chest)
+		else
+			chest = addRandomItemToChest(chest)
+		end		
 	end
 end
 
 -- add item to chest, item cannot repeat
 function addRandomItemToChest(chest)
-	local item = getItem()
+	local item = getRandomItem()
 	if chest:getItemCountById(item) ~= 0 then
 		chest = addRandomItemToChest(chest)
 	else
-		chest:addItem(item, 1, INDEX_WHEREEVER, 0)
+		if item == 38616 then
+			chest:addItem(item, 20, INDEX_WHEREEVER, 0)
+		elseif item == 38615 or item == 38614 
+			chest:addItem(item, 3, INDEX_WHEREEVER, 0)
+		else
+			chest:addItem(item, 1, INDEX_WHEREEVER, 0)
+		end
+		
 	end
 	return chest
 end
 
+-- add random weapon to chest
+-- main purpose of this function is to make sure that chest contains weapon
+function addRandomWeaponToChest(chest)
+	chest:addItem(getRandomWeapon(), 1, INDEX_WHEREEVER, 0)
+	return chest
+end
+
 -- draw item
-function getItem()
+function getRandomItem()
 	local itemClass = math.random(10)
 	if 0 <= itemClass and itemClass <= 5 then -- common items
 		return COMMON_ITEMS[math.random(#COMMON_ITEMS)]
@@ -340,6 +355,18 @@ function getItem()
 		return LESS_COMMON_ITEMS[math.random(#LESS_COMMON_ITEMS)]
 	else -- rare items
 		return RARE_ITEMS[math.random(#RARE_ITEMS)]
+	end
+end
+
+-- draw weapon
+function getRandomWeapon()
+	local itemClass = math.random(10)
+	if 0 <= itemClass and itemClass <= 5 then -- common items
+		return COMMON_WEAPONS[math.random(#COMMON_WEAPONS)]
+	elseif 6 <= itemClass and itemClass <= 9 then -- less common items
+		return LESS_COMMON_WEAPONS[math.random(#LESS_COMMON_WEAPONS)]
+	else -- rare items
+		return RARE_WEAPONS[math.random(#RARE_WEAPONS)]
 	end
 end
 
