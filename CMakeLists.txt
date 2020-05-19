@@ -138,15 +138,15 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # https://kristerw.blogspot.com/2017/09/useful-gcc-warning-options-not-enabled.html
 
   # cmake -DCMAKE_BUILD_TYPE=Release ..
-  set(CMAKE_CXX_FLAGS_RELEASE   "-Wall -Werror -pipe -fvisibility=hidden -march=native -O2")
+  set(CMAKE_CXX_FLAGS_RELEASE   "-Wall -pipe -fvisibility=hidden -march=native -O2")
 
   # cmake -DCMAKE_BUILD_TYPE=Debug ..
   # Ubuntu 16.04
   if(CMAKE_CXX_COMPILER_VERSION STREQUAL "5.4.0")
-    set(CMAKE_CXX_FLAGS_DEBUG   "-Wall -Werror -pipe -O0 -g -Wextra -Wconversion -Wlogical-op -Wold-style-cast -Wuseless-cast -Wdouble-promotion -Wshadow -Wformat=2 -Wno-error")
+    set(CMAKE_CXX_FLAGS_DEBUG   "-Wall -pipe -O0 -g -Wextra -Wconversion -Wlogical-op -Wold-style-cast -Wuseless-cast -Wdouble-promotion -Wshadow -Wformat=2 -Wno-error")
   else()
     # Ubuntu 18.04
-    set(CMAKE_CXX_FLAGS_DEBUG   "-Wall -Werror -pipe -O0 -g -Wextra -Wconversion -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wuseless-cast -Wdouble-promotion -Wshadow -Wformat=2 -Wno-error")
+    set(CMAKE_CXX_FLAGS_DEBUG   "-Wall -pipe -O0 -g -Wextra -Wconversion -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wrestrict -Wnull-dereference -Wold-style-cast -Wuseless-cast -Wdouble-promotion -Wshadow -Wformat=2 -Wno-error")
   endif()
 
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")

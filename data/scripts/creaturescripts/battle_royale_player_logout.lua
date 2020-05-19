@@ -2,7 +2,7 @@ local brPlayerOnLogout = CreatureEvent("BattleRoyaleLogout")
 
 function brPlayerOnLogout.onLogout(player)
 	if brGame.canRegister and not brGame.isBattle then
-		brGame:removePlayer(player:getName())
+		brGame:removePlayer(player)
 	end
 
 	if brGame.isBattle then

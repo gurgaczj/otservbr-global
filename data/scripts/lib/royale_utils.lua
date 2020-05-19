@@ -131,7 +131,8 @@ function getPlayerStatsInfo(player)
 		maxMana = maxManaVal,
 		vocation = player:getVocation(),
 		skull = player:getSkull(),
-		magicLevel = player:getBaseMagicLevel()
+		magicLevel = player:getBaseMagicLevel(),
+		manaSpent = player:getManaSpent()
 	}
 	statsTable.Skills = {}
 	for i = SKILL_FIST, SKILL_FISHING do
@@ -159,6 +160,7 @@ function setPlayerStatsBack(player, statsTable)
 	player:setSkullTime(statsTable.skullTime)
 	player:setSkull(statsTable.skull)
 	player:setBaseMagicLevel(statsTable.magicLevel)
+	player:setManaSpent(statsTable.manaSpent)
 	for i = SKILL_FIST, SKILL_FISHING do
 		player:setSkillValues(i, statsTable.Skills[i].level, statsTable.Skills[i].percent, statsTable.Skills[i].tries)
 	end
@@ -329,7 +331,7 @@ function addRandomItemToChest(chest)
 	else
 		if item == 38616 then
 			chest:addItem(item, 20, INDEX_WHEREEVER, 0)
-		elseif item == 38615 or item == 38614 
+		elseif item == 38615 or item == 38614 then
 			chest:addItem(item, 3, INDEX_WHEREEVER, 0)
 		else
 			chest:addItem(item, 1, INDEX_WHEREEVER, 0)

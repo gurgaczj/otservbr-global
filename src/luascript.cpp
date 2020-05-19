@@ -2592,6 +2592,7 @@ void LuaScriptInterface::registerFunctions()
 	registerMethod("Player", "resetSkills", LuaScriptInterface::luaPlayerResetSkills);
 	registerMethod("Player", "removeUnjustifiedKill", LuaScriptInterface::luaPlayerRemoveUnjustifiedKill);
 	registerMethod("Player", "setBattleRoyalePlayer", LuaScriptInterface::luaPlayerSetBattleRoyalePlayer);
+	registerMethod("Player", "setManaSpent", LuaScriptInterface::luaPlayerSetManaSpent);
 	
 	
 	// New prey
@@ -11072,6 +11073,23 @@ int LuaScriptInterface::luaPlayerSetBattleRoyalePlayer(lua_State* L)
 	if (player) {
 		player->isBattleRoyalePlayer = getBoolean(L, 2);
 	
+		pushBoolean(L, true);
+	}
+	else {
+		lua_pushnil(L);
+	}
+	return 1;
+}
+
+int LuaScriptInterface::luaPlayerSetManaSpent(lua_State* L)
+{
+	// player:setManaSpent(int val)
+	Player* player = getUserdata<Player>(L, 1);
+	uint64_t newManaSpent = getNumber<uint64_t>(L, 2);
+	if (player && newManaSpent >= 0) {
+		player->manaSpent = newManaSpent;
+		player->sendSkills();
+
 		pushBoolean(L, true);
 	}
 	else {

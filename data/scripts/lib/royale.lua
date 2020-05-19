@@ -49,6 +49,7 @@ function BattleRoyale:begin()
 		actualPlayer:setSkillValues(2, 70, 0, 0)
 		actualPlayer:setSkillValues(3, 70, 0, 0)
 		actualPlayer:setBaseMagicLevel(3)
+		actualPlayer:setManaSpent(1)
 		actualPlayer:setBattleRoyalePlayer(true);
 		teleportPlayerToRoyale(actualPlayer)
 		moveItemsToDepot(actualPlayer)
@@ -66,11 +67,7 @@ function BattleRoyale:playerDied(deadPlayer)
 	self:returnPlayerStats(deadPlayer)
 	deadPlayer:removeAllConditions()
 	local actualPlayersCount = #self.players
-	for _, player in ipairs(self.players) do
-		if player:getName() == deadPlayer:getName() then
-			table.remove(self.players, _)
-		end
-	end
+	self:removePlayer(deadPlayer)
 	deadPlayer:addItem(1988, 1, INDEX_WHEREEVER, 0)
 	if actualPlayersCount ~= 1 then
 		rewardPlayer(deadPlayer, totalPlayerCount, actualPlayersCount, self.goldPool)
@@ -120,7 +117,7 @@ end
 
 -- reset br state
 function BattleRoyale:reset()
-	cleanBattleRoyaleMap()
+	-- cleanBattleRoyaleMap()
 	self.isBattle = false
 	brPlayersStats = {}
 	brGame = nil
@@ -136,16 +133,17 @@ function BattleRoyale:addPlayer(player)
 			return
 		end
 		table.insert(self.players, player)
-		player:sendTextMessage(MESSAGE_INFO_DESCR, "You just signed up for battle royale.")
+		player:sendTextMessage(MESSAGE_INFO_DESCR, "You just signed up for battle royale. \n Remember that you can unregister from battle royale with !royale unregister until battle has not started.")
 	else
 		player:sendTextMessage(MESSAGE_INFO_DESCR, "Signing up for battle royale is not open yet.")
 	end
 end
 
 -- remove player
-function BattleRoyale:removePlayer(playerName)
+function BattleRoyale:removePlayer(player)
+	local removedPlayerName = player:getName()
 	for i = 1, #self.players do
-		if self.players[i]:getName() == playerName then
+		if self.players[i]:getName() == removedPlayerName then
 			table.remove(self.players, i)
 			return true
 		end		
@@ -155,8 +153,9 @@ end
 
 -- checks if player is already registered
 function BattleRoyale:alreadyRegistered(player)
+	local playerName = player:getName()
 	for _, p in ipairs(self.players) do
-		if p:getName() == player:getName() then
+		if p:getName() == playerName then
 			return true
 		end
 	end
@@ -166,6 +165,7 @@ end
 -- allows register
 function BattleRoyale:startRegister()
 	self.canRegister = true
+	broadcastMessage("Signing up for Battle Royale just started! \nSign up with !royale command", MESSAGE_STATUS_CONSOLE_BLUE)
 end
 
 -- closes register

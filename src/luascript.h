@@ -1052,6 +1052,7 @@ class LuaScriptInterface
 		static int luaPlayerResetSkills(lua_State* L);
 		static int luaPlayerRemoveUnjustifiedKill(lua_State* L);
 		static int luaPlayerSetBattleRoyalePlayer(lua_State* L);
+		static int luaPlayerSetManaSpent(lua_State* L);
 
 		static int luaPlayerGetHouse(lua_State* L);
 		static int luaPlayerSendHouseWindow(lua_State* L);
