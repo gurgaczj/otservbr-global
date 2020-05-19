@@ -4938,7 +4938,9 @@ void Player::onDeEquipImbueItem(Imbuement* imbuement)
 void Player::removeAllConditions()
 {
 	for (Condition* condition : conditions) {
-		removeCondition(condition->getType());
+		if (hasCondition(condition->getType(), condition->getSubId())) {
+			removeCondition(condition->getType(), true);
+		}
 	}
 }
 
