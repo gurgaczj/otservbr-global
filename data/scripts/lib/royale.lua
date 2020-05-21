@@ -29,13 +29,14 @@ function BattleRoyale:begin()
 
 	self.isBattle = true
 	spawnChests()
+
 	-- for each registered player
 	for playerNum = 1, totalPlayerCount do
 		local actualPlayer = self.players[playerNum]
 		actualPlayer:save()
 		local playerID = actualPlayer:getName()
 		brPlayersStats[playerID] = getPlayerStatsInfo(actualPlayer)
-		actualPlayer:removeAllConditions()
+		removeAllConditions(actualPlayer)
 		local playerParty = actualPlayer:getParty()
 		if playerParty ~= nil then
 			playerParty:removeMember(actualPlayer)
@@ -50,10 +51,10 @@ function BattleRoyale:begin()
 		actualPlayer:setSkillValues(3, 70, 0, 0)
 		actualPlayer:setBaseMagicLevel(3)
 		actualPlayer:setManaSpent(1)
-		actualPlayer:setBattleRoyalePlayer(true);
 		teleportPlayerToRoyale(actualPlayer)
+		actualPlayer:setBattleRoyalePlayer(true);
 		moveItemsToDepot(actualPlayer)
-		actualPlayer:addItem(1988, 1, false, 1, CONST_SLOT_WHEREEVER)
+		actualPlayer:addItem(1987, 1, false, 1, CONST_SLOT_WHEREEVER)
 		registerEvent(actualPlayer, "BattleRoyaleDeath")
 		registerEvent(actualPlayer, "BattleRoyaleHealthChange")
 		actualPlayer:sendTextMessage(MESSAGE_STATUS_WARNING, "Beware of fire. Island will start burning in 2 minutes!")
@@ -65,7 +66,6 @@ end
 -- after player death
 function BattleRoyale:playerDied(deadPlayer)
 	self:returnPlayerStats(deadPlayer)
-	deadPlayer:removeAllConditions()
 	local actualPlayersCount = #self.players
 	self:removePlayer(deadPlayer)
 	deadPlayer:addItem(1988, 1, INDEX_WHEREEVER, 0)
@@ -79,6 +79,7 @@ end
 function BattleRoyale:returnPlayerStats(player)
 	unregisterEvent(player, "BattleRoyaleDeath")
 	unregisterEvent(player, "BattleRoyaleHealthChange")
+	removeAllConditions(player)
 	local playerID = player:getName()
 	setPlayerStatsBack(player, brPlayersStats[playerID])
 	print(player:getName() .. " stats returned")
@@ -104,7 +105,6 @@ function BattleRoyale:rewardWinner()
 		addPremiumPointsForPlayer(playerId, 150)
 		message = message .. "Outstanding, you have earned yourself 150 tibia coins and 24 hours of 50% bonus experience.\n" .. thanks
 		player:sendTextMessage(MESSAGE_INFO_DESCR, message)
-		player:removeAllConditions()
 		teleportToTemple(player)
 		player:setSkillLoss(true)
 		giveBonusExp(player, 24)

@@ -10998,7 +10998,7 @@ int LuaScriptInterface::luaPlayerGetClient(lua_State* L)
 
 int LuaScriptInterface::luaPlayerRemoveAllConditions(lua_State* L)
 {
-	// player:getClient()
+	// player:removeAllConditions()
 	Player* player = getUserdata<Player>(L, 1);
 	if (player) {
 		player->removeAllConditions();
@@ -11011,7 +11011,7 @@ int LuaScriptInterface::luaPlayerRemoveAllConditions(lua_State* L)
 
 int LuaScriptInterface::luaPlayerSetSkillValues(lua_State* L)
 {
-	// player:getClient()
+	// player:setSkillValues()
 	Player* player = getUserdata<Player>(L, 1);
 	if (player) {
 		uint16_t skill = getNumber<uint16_t>(L, 2);
@@ -11032,7 +11032,7 @@ int LuaScriptInterface::luaPlayerSetSkillValues(lua_State* L)
 
 int LuaScriptInterface::luaPlayerResetSkills(lua_State* L)
 {
-	// player:getClient()
+	// player:resetSkills()
 	Player* player = getUserdata<Player>(L, 1);
 	if (player) {
 
@@ -11365,7 +11365,7 @@ int LuaScriptInterface::luaPlayerSetBaseXpGain(lua_State *L)
 
 int LuaScriptInterface::luaPlayerSetBonusExp(lua_State* L)
 {
-	// player:setBaseXpGain(value)
+	// player:luaPlayerSetBonusExp(value)
 	Player* player = getUserdata<Player>(L, 1);
 	if (player) {
 		player->setBonusExpTime(getNumber<uint64_t>(L, 2));

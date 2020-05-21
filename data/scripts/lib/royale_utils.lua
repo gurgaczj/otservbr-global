@@ -55,6 +55,33 @@ FIRE_SPAWN_TIME = 120000 -- amount of time it takes to start spawn fire after ev
 
 thanks = "Thank you for participating in Battle Royale!"
 
+local conditions = {
+	CONDITION_POISON,
+	CONDITION_FIRE,
+	CONDITION_ENERGY,
+	CONDITION_BLEEDING,
+	CONDITION_HASTE,
+	CONDITION_PARALYZE,
+	CONDITION_OUTFIT,
+	CONDITION_INVISIBLE,
+	CONDITION_LIGHT,
+	CONDITION_MANASHIELD,
+	CONDITION_INFIGHT,
+	CONDITION_DRUNK,
+	CONDITION_REGENERATION,
+	CONDITION_SOUL,
+	CONDITION_DROWN,
+	CONDITION_MUTED,
+	CONDITION_CHANNELMUTEDTICKS,
+	CONDITION_YELLTICKS,
+	CONDITION_ATTRIBUTES,
+	CONDITION_FREEZING,
+	CONDITION_DAZZLED,
+	CONDITION_CURSED,
+	CONDITION_PACIFIED,
+	CONDITION_SPELLCOOLDOWN,
+	CONDITION_SPELLGROUPCOOLDOWN
+}
 -- for tests
 -- local ROYALE_MAP_ZONES = {
 	-- {171, 203, 186, 217}
@@ -168,10 +195,8 @@ end
 
 -- removes player conditions
 function removeAllConditions(player)
-	for condition = CONDITION_POISON, CONDITION_SPELLGROUPCOOLDOWN do
-		if player:hasCondition(condition) then
-			player:removeCondition(condition)
-		end
+	for condition = 1, #conditions do
+		player:removeCondition(conditions[i])
 	end
 end
 
@@ -417,7 +442,8 @@ end
 -- gives player bonus exp time
 function giveBonusExp(player, hours)
 	local plusTime = hours * 60 * 60
-	db.asyncQuery("UPDATE players SET bonusexp = " .. db.escapeString(os.time() + plusTime) .. " WHERE id = " .. db.escapeString(player:getGuid()))
+	player:setBonusExp(plusTime)
+	--db.asyncQuery("UPDATE players SET bonusexp = " .. db.escapeString(os.time() + plusTime) .. " WHERE id = " .. db.escapeString(player:getGuid()))
 end
 
 -- teleports player to temple
